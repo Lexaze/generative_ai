@@ -8,17 +8,23 @@ import cors from "cors";
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use("/api", mainRouter);
 app.use(errorHandler);
 
-// Test database connection
+// Confirm database access before accepting API requests.
 async function startServer() {
   try {
     const connection = await db.getConnection();
     console.log("Database connection successful");
     connection.release();
 
+    // Start accepting requests after confirming the database is reachable.
     app.listen(3777, (err) => {
       if (err) {
         throw err;

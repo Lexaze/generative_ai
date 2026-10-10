@@ -5,12 +5,12 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { User, Bot, Check, Copy } from "lucide-react";
 import styles from "./ChatMessage.module.css";
 
-// Component for displaying code blocks with syntax highlighting and copy functionality
+// Render formatted code with syntax highlighting and a copy action.
 const CodeBlock = ({ language, value }) => {
   // State to track whether the code has been copied
   const [copied, setCopied] = useState(false);
 
-  // Copy code to clipboard
+  // Copy the displayed code and show brief confirmation.
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
     setCopied(true);
@@ -60,7 +60,7 @@ const CodeBlock = ({ language, value }) => {
   );
 };
 
-// Main component for displaying chat messages
+// Render a user or assistant message with the appropriate formatting.
 function ChatMessage({ role, content }) {
   // Check if the message belongs to the user
   const isUser = role === "user";

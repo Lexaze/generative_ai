@@ -5,8 +5,20 @@
   margin: 0 auto;
   width: 100%;
   gap: 20px;
+  animation: message-appear 180ms ease-out both;
 }
 
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .message.user {
   flex-direction: row-reverse;
 }
@@ -22,15 +34,16 @@
 }
 
 .avatar.user {
-  background-color: #3b82f6;
+  background-color: var(--accent-color);
 }
 
 .avatar.assistant {
-  background-color: #10a37f;
+  background-color: var(--accent-color);
 }
 
 .content {
-  background-color: var(--bg-input);
+  background-color: var(--user-message-bg);
+  color: var(--user-message-text);
   padding: 14px 20px;
   border-radius: 18px;
   font-size: 16px;
@@ -103,7 +116,7 @@
 }
 
 .markdownBody a {
-  color: #3b82f6;
+  color: var(--accent-color);
   text-decoration: none;
 }
 
@@ -123,7 +136,7 @@
   padding: 0.2em 0.5em;
   margin: 0;
   font-size: 90%;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-hover);
   border-radius: 6px;
   font-family:
     ui-monospace,
@@ -141,7 +154,7 @@
   overflow: auto;
   font-size: 90%;
   line-height: 1.5;
-  background-color: #0d0d0d;
+  background-color: var(--code-bg);
   border-radius: 8px;
   margin-bottom: 18px;
 }
@@ -170,7 +183,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #171717;
+  background-color: var(--bg-hover);
   padding: 8px 16px;
   font-family: monospace;
   font-size: 12px;

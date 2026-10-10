@@ -1,16 +1,90 @@
-# React + Vite
+# ChatGPT Clone
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A full-stack chat application with a React/Vite frontend and a Node.js backend. The project is organized as two separate applications: `frontend` for the user interface and `backend` for authentication and chat APIs.
 
-Currently, two official plugins are available:
+## Project structure
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```text
+ChatGPT_clone/
+├── backend/
+│   ├── db/
+│   │   ├── db_config.js
+│   │   └── schema.sql
+│   ├── src/
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   └── chat/
+│   │   └── middleware/
+│   ├── .env.example
+│   ├── index.js
+│   └── package.json
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   └── components/
+│   ├── index.html
+│   ├── vite.config.js
+│   └── package.json
+├── .gitignore
+└── README.md
+```
 
-## React Compiler
+## Requirements
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js and npm
+- A SQL database configured for this project
+- Git
 
-## Expanding the Oxlint configuration
+## Getting started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Run the commands below from the project root. Use two terminals so the backend and frontend can run at the same time.
+
+### 1. Configure the database and backend environment
+
+1. Create a database using your database tool.
+2. Apply `backend/db/schema.sql` to that database.
+3. Create the backend environment file from the example:
+
+   **Windows PowerShell**
+   ```powershell
+   Copy-Item backend/.env.example backend/.env
+   ```
+
+   **macOS/Linux/Git Bash**
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+
+4. Edit `backend/.env` and enter your local database connection details and any other values required by `backend/.env.example`.
+
+Do not commit `backend/.env` or put passwords, tokens, or API keys in source code. Keep placeholder values in `.env.example` so other developers know which variables are required.
+
+### 2. Install and start the backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+If `npm run dev` is not listed in `backend/package.json`, run `npm run` to see the available scripts and use the appropriate start script.
+
+### 3. Install and start the frontend
+
+Open a second terminal from the project root:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+If `npm run dev` is not listed in `frontend/package.json`, run `npm run` to see the available scripts. Vite normally prints the local frontend URL in the terminal.
+
+## Development notes
+
+- Keep backend dependencies and scripts in `backend/package.json`.
+- Keep frontend dependencies and scripts in `frontend/package.json`.
+- Keep both package lock files in Git so installs can be reproduced.
+- Commit source code, SQL schema changes, and `.env.example` files; do not commit `node_modules`, build output, local environment files, or secrets.
+- Update this README when setup steps, environment variables, or application features change.
