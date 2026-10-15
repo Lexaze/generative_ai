@@ -17,22 +17,20 @@ app.use(
 app.use("/api", mainRouter);
 app.use(errorHandler);
 
-// Confirm database access before accepting API requests.
+const PORT = process.env.PORT || 3777;
+
 async function startServer() {
   try {
     const connection = await db.getConnection();
     console.log("Database connection successful");
     connection.release();
-
-    // Start accepting requests after confirming the database is reachable.
-    app.listen(3777, (err) => {
-      if (err) {
-        throw err;
-      }
-      console.log("Server is running on port http://localhost:3777");
-    });
   } catch (error) {
-    console.log("Error in connecting to the database", error.message);
+    console.log("Error in connecting to the database:", error.message);
   }
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 }
+
 startServer();
