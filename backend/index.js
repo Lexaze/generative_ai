@@ -25,7 +25,7 @@ async function startServer() {
     console.log("Database connection successful");
     connection.release();
   } catch (error) {
-    console.log("Error in connecting to the database:", error.message);
+    console.error("Error in connecting to the database:", error);
   }
 
   app.listen(PORT, () => {
