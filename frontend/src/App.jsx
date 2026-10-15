@@ -7,7 +7,7 @@ import ChatInput from "./components/ChatInput/ChatInput";
 import AuthScreen from "./components/AuthScreen/AuthScreen";
 
 axios.defaults.baseURL =
-  import.meta.env.VITE_API_URL || "http://localhost:3777/api";
+  import.meta.env.VITE_API_URL || "https://generative-ai-umr0.onrender.com/api";
 axios.defaults.withCredentials = true;
 
 // Coordinate authentication, chat history, and the active conversation.
