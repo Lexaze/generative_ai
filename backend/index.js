@@ -5,16 +5,9 @@ import cors from "cors";
 import db from "./db/db_config.js";
 import mainRouter from "./src/api/main.routes.js";
 import errorHandler from "./src/middleware/errorHandler.js";
+import { isAllowedFrontendOrigin } from "./src/middleware/requireFrontendOrigin.js";
 
 const app = express();
-
-// 1. Robust CORS configuration handling both production and preview deployments
-const allowedOrigins = ["https://generative-ai-ten.vercel.app"];
-
-// Fallback to push extra origins from environment dashboard if needed
-if (process.env.FRONTEND_ORIGIN) {
-  allowedOrigins.push(process.env.FRONTEND_ORIGIN);
-}
 
 app.use(
   cors({
@@ -22,12 +15,10 @@ app.use(
       // Allow server-to-server or local automated test tools (no origin)
       if (!origin) return callback(null, true);
 
-      // Match explicit domains OR allow any dynamically generated Vercel branch preview URL
-      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+      if (isAllowedFrontendOrigin(origin)) {
         return callback(null, true);
-      } else {
-        return callback(new Error("Blocked by CORS security policy"));
       }
+      return callback(new Error("Blocked by CORS security policy"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
