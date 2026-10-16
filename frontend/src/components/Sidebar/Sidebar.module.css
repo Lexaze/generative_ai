@@ -269,6 +269,44 @@
   border-top: 1px solid var(--border-color);
 }
 
+.guestActions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 5px 2px;
+}
+
+.guestMessage {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.guestButtons {
+  display: flex;
+  gap: 7px;
+}
+
+.guestButtons button {
+  min-height: 32px;
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  background: var(--bg-main);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.guestButtons button:last-child {
+  border-color: var(--accent-color);
+  color: var(--accent-foreground);
+  background: var(--accent-color);
+}
+
 .user {
   display: flex;
   align-items: center;
@@ -384,6 +422,21 @@
   padding: 0;
 }
 
+.collapsed .guestActions {
+  align-items: center;
+}
+
+.collapsed .guestButtons {
+  flex-direction: column;
+  width: 100%;
+}
+
+.collapsed .guestButtons button {
+  width: 100%;
+  padding: 0 2px;
+  font-size: 9px;
+}
+
 @media (max-width: 760px) {
   .sidebar {
     position: fixed;
@@ -446,6 +499,20 @@
   .sidebar.collapsed .signOut {
     justify-content: flex-start;
     padding: 0 7px;
+  }
+
+  .sidebar.collapsed .guestActions {
+    align-items: stretch;
+  }
+
+  .sidebar.collapsed .guestButtons {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .sidebar.collapsed .guestButtons button {
+    padding: 0;
+    font-size: 11px;
   }
 
   .mobileClose {

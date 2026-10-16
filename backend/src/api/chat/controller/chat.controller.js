@@ -1,6 +1,7 @@
 import {
   createChat,
   createMessage,
+  generateAssistantAnswer,
   getChatMessages,
   getUserChats,
 } from "../service/chat.service.js";
@@ -75,6 +76,46 @@ export async function createMessageController(req, res, next) {
 
     const result = await createMessage(req.user.id, chatId, question.trim());
     return res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+// Generate an ephemeral reply for guests without saving conversation data.
+export async function createGuestMessageController(req, res, next) {
+  try {
+    const body = req.body && typeof req.body === "object" ? req.body : {};
+    const { question, history = [] } = body;
+    if (
+      typeof question !== "string" ||
+      !question.trim() ||
+      question.length > 12000
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Enter a message of up to 12,000 characters.",
+      });
+    }
+    if (
+      !Array.isArray(history) ||
+      history.length > 10 ||
+      history.some(
+        (message) =>
+          !message ||
+          !["user", "assistant"].includes(message.role) ||
+          typeof message.content !== "string" ||
+          !message.content.trim() ||
+          message.content.length > 12000,
+      )
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Conversation history is invalid.",
+      });
+    }
+
+    const result = await generateAssistantAnswer(history, question.trim());
+    return res.status(200).json({ success: true, data: result });
   } catch (error) {
     return next(error);
   }

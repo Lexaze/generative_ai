@@ -31,6 +31,31 @@
   gap: 10px;
 }
 
+.authActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.authActions button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: var(--bg-main);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.authActions button:last-child {
+  border-color: var(--accent-color);
+  color: var(--accent-foreground);
+  background: var(--accent-color);
+}
+
 .greeting {
   color: var(--text-secondary);
   font-size: 11px;

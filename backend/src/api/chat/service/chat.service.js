@@ -24,7 +24,7 @@ function getGeminiClient() {
 }
 
 // Generate an assistant response using the current chat's recent messages.
-async function generateAssistantAnswer(historyRows, question) {
+export async function generateAssistantAnswer(historyRows, question) {
   const history = historyRows.map((row) => ({
     role: row.role === "assistant" ? "model" : "user",
     parts: [{ text: row.content }],

@@ -29,6 +29,7 @@ function Sidebar({
   onClose,
   onToggleCollapse,
   onLogout,
+  onOpenAuth,
 }) {
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState("");
@@ -39,8 +40,8 @@ function Sidebar({
     return chats.filter((chat) => chat.title.toLowerCase().includes(query));
   }, [chats, search]);
   // Derive a compact avatar label from the account name.
-  const initials = user.name
-    .split(/\s+/)
+  const initials = user?.name
+    ?.split(/\s+/)
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
@@ -157,30 +158,46 @@ function Sidebar({
             </ul>
           ) : (
             <p className={`${styles.historyMessage} ${styles.actionLabel}`}>
-              {search ? "No matching chats." : "Your conversations will show up here."}
+              {search
+                ? "No matching chats."
+                : user
+                  ? "Your conversations will show up here."
+                  : "Sign in to save your conversations."}
             </p>
           )}
         </div>
       </div>
 
       <div className={styles.footer}>
-        <div className={styles.user}>
-          <div className={styles.avatar}>{initials}</div>
-          <div className={`${styles.userInfo} ${styles.actionLabel}`}>
-            <span className={styles.userName}>{user.name}</span>
-            <span className={styles.userEmail}>{user.email}</span>
+        {user ? (
+          <div className={styles.user}>
+            <div className={styles.avatar}>{initials}</div>
+            <div className={`${styles.userInfo} ${styles.actionLabel}`}>
+              <span className={styles.userName}>{user.name}</span>
+              <span className={styles.userEmail}>{user.email}</span>
+            </div>
+            <button
+              className={styles.signOut}
+              onClick={onLogout}
+              type="button"
+              aria-label="Sign out of your account"
+              title="Sign out"
+            >
+              <LogOut size={17} />
+              <span className={styles.actionLabel}>Sign out</span>
+            </button>
           </div>
-          <button
-            className={styles.signOut}
-            onClick={onLogout}
-            type="button"
-            aria-label="Sign out of your account"
-            title="Sign out"
-          >
-            <LogOut size={17} />
-            <span className={styles.actionLabel}>Sign out</span>
-          </button>
-        </div>
+        ) : (
+          <div className={styles.guestActions}>
+            <p className={`${styles.guestMessage} ${styles.actionLabel}`}>
+              Sign in to save your chat history.
+            </p>
+            <div className={styles.guestButtons}>
+              <button type="button" onClick={() => onOpenAuth("login")}>Log in</button>
+              <button type="button" onClick={() => onOpenAuth("signup")}>Sign up</button>
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

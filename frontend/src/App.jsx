@@ -22,11 +22,12 @@ function App() {
   const [user, setUser] = useState(null);
   const [authStatus, setAuthStatus] = useState("loading");
   const [connectionError, setConnectionError] = useState("");
+  const [authMode, setAuthMode] = useState(null);
   const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingChats, setIsLoadingChats] = useState(true);
+  const [isLoadingChats, setIsLoadingChats] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -49,7 +50,7 @@ function App() {
     });
   }, []);
 
-  // Clear private chat state when the session expires.
+  // Clear private chat state when the session expires and continue as a guest.
   const handleUnauthorized = useCallback((error) => {
     if (error.response?.status !== 401) return false;
 
@@ -58,7 +59,7 @@ function App() {
     setConversations([]);
     setActiveChatId(null);
     setIsLoadingChats(false);
-    setAuthStatus("unauthenticated");
+    setAuthStatus("guest");
     return true;
   }, []);
 
@@ -70,18 +71,22 @@ function App() {
       .then(({ data }) => {
         if (!cancelled) {
           setUser(data.data);
+          setIsLoadingChats(true);
           setAuthStatus("authenticated");
         }
       })
       .catch((error) => {
         if (cancelled) return;
         if (error.response?.status === 401) {
-          setAuthStatus("unauthenticated");
+          setAuthStatus("guest");
         } else {
           setConnectionError(
             "Couldn't reach the server. Check that the backend is running, then retry.",
           );
-          setAuthStatus("connection-error");
+          setSubmitError(
+            "Couldn't verify your account. You can still chat as a guest.",
+          );
+          setAuthStatus("guest");
         }
       });
 
@@ -182,19 +187,20 @@ function App() {
     setIsSidebarCollapsed((collapsed) => !collapsed);
   }
 
-  // Start a clean workspace after successful sign-in or registration.
+  // Start the account workspace after successful sign-in or registration.
   function handleAuthenticated(authenticatedUser) {
     setChats([]);
     setConversations([]);
     setActiveChatId(null);
-    setIsLoadingChats(true);
     setSubmitError("");
     setConnectionError("");
     setUser(authenticatedUser);
+    setAuthMode(null);
+    setIsLoadingChats(true);
     setAuthStatus("authenticated");
   }
 
-  // Revoke the current session and return to the sign-in screen.
+  // Revoke the current session and keep the dashboard available as a guest.
   async function handleLogout() {
     try {
       await axios.post("/auth/logout");
@@ -203,7 +209,7 @@ function App() {
       setConversations([]);
       setActiveChatId(null);
       setIsLoadingChats(false);
-      setAuthStatus("unauthenticated");
+      setAuthStatus("guest");
       setIsSidebarOpen(false);
     } catch (error) {
       if (handleUnauthorized(error)) return;
@@ -215,6 +221,14 @@ function App() {
 
   // Create and open a fresh, empty conversation.
   async function handleNewChat() {
+    if (!user) {
+      setActiveChatId(null);
+      setConversations([]);
+      setSubmitError("");
+      setIsSidebarOpen(false);
+      return;
+    }
+
     try {
       const { data } = await axios.post("/chat/chats");
       const newChat = data.data;
@@ -239,7 +253,7 @@ function App() {
     setIsSidebarOpen(false);
   }
 
-  // Submit a prompt and update chat history with the server response.
+  // Submit prompts to persistent account history or an ephemeral guest chat.
   async function handleSubmit(question) {
     if (!question.trim() || isLoading) return false;
 
@@ -251,9 +265,31 @@ function App() {
     setConversations((previous) => [...previous, tempUserMessage]);
     setSubmitError("");
     setIsLoading(true);
-
     let createdChat = null;
+
     try {
+      if (!user) {
+        const history = conversations
+          .filter((message) => !String(message.id).startsWith("pending-"))
+          .slice(-10)
+          .map(({ role, content }) => ({ role, content }));
+        const { data } = await axios.post("/chat/guest/messages", {
+          question: question.trim(),
+          history,
+        });
+        const timestamp = Date.now();
+        setConversations((previous) => [
+          ...previous.filter((message) => message.id !== tempUserMessage.id),
+          { id: `guest-${timestamp}-user`, role: "user", content: question.trim() },
+          {
+            id: `guest-${timestamp}-assistant`,
+            role: "assistant",
+            content: data.data.text,
+          },
+        ]);
+        return true;
+      }
+
       let chatId = activeChatId;
       if (!chatId) {
         const { data } = await axios.post("/chat/chats");
@@ -301,48 +337,6 @@ function App() {
     return <div className="startup">Opening ChatGPT…</div>;
   }
 
-  if (authStatus === "connection-error") {
-    // Retry restoring the session after a temporary network failure.
-    async function retryConnection() {
-      setAuthStatus("loading");
-      setConnectionError("");
-
-      try {
-        const { data } = await axios.get("/auth/me");
-        setUser(data.data);
-        setAuthStatus("authenticated");
-      } catch (error) {
-        if (error.response?.status === 401) {
-          setAuthStatus("unauthenticated");
-        } else {
-          setConnectionError(
-            "Couldn't reach the server. Check that the backend is running, then retry.",
-          );
-          setAuthStatus("connection-error");
-        }
-      }
-    }
-
-    return (
-      <main className="connection-error">
-        <h1>ChatGPT is taking a moment.</h1>
-        <p>{connectionError}</p>
-        <button type="button" onClick={retryConnection}>
-          Retry connection
-        </button>
-      </main>
-    );
-  }
-
-  if (authStatus !== "authenticated" || !user) {
-    return (
-      <AuthScreen
-        onAuthenticated={handleAuthenticated}
-        connectionError={connectionError}
-      />
-    );
-  }
-
   return (
     <div className="app">
       {isSidebarOpen && (
@@ -365,6 +359,7 @@ function App() {
         onClose={closeSidebar}
         onToggleCollapse={toggleSidebarCollapse}
         onLogout={handleLogout}
+        onOpenAuth={setAuthMode}
       />
       <main className="chat">
         <ChatHeader
@@ -372,6 +367,7 @@ function App() {
           theme={theme}
           onToggleTheme={toggleTheme}
           onToggleSidebar={toggleSidebar}
+          onOpenAuth={setAuthMode}
         />
 
         <MessageList
@@ -387,6 +383,14 @@ function App() {
           error={submitError}
         />
       </main>
+      {authMode && (
+        <AuthScreen
+          initialMode={authMode}
+          onClose={() => setAuthMode(null)}
+          onAuthenticated={handleAuthenticated}
+          connectionError={connectionError}
+        />
+      )}
     </div>
   );
 }

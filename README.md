@@ -83,6 +83,8 @@ If `npm run dev` is not listed in `frontend/package.json`, run `npm run` to see 
 
 ## Development notes
 
+- The dashboard and guest chat are available without an account. Guest conversations exist only in the current browser session and are not saved; signing in or creating an account stores conversations in the database for later access.
+- Guest chat requests are limited to 20 messages per IP address every 15 minutes.
 - Keep backend dependencies and scripts in `backend/package.json`.
 - Keep frontend dependencies and scripts in `frontend/package.json`.
 - Keep both package lock files in Git so installs can be reproduced.
